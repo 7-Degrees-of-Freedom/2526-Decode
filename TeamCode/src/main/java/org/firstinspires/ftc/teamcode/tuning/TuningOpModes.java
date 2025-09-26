@@ -44,7 +44,6 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.OTOSLocalizer;
 import org.firstinspires.ftc.teamcode.PinpointLocalizer;
 import org.firstinspires.ftc.teamcode.TankDrive;
-import org.firstinspires.ftc.teamcode.ThreeDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.TwoDeadWheelLocalizer;
 
 import java.util.ArrayList;
@@ -146,16 +145,8 @@ public final class TuningOpModes {
                     leftEncs.add(new EncoderRef(0, 1));
                     rightEncs.add(new EncoderRef(0, 2));
                     rightEncs.add(new EncoderRef(0, 3));
-                } else if (md.localizer instanceof ThreeDeadWheelLocalizer) {
-                    ThreeDeadWheelLocalizer dl = (ThreeDeadWheelLocalizer) md.localizer;
-                    encoderGroups.add(new LynxQuadratureEncoderGroup(
-                            hardwareMap.getAll(LynxModule.class),
-                            Arrays.asList(dl.par0, dl.par1, dl.perp)
-                    ));
-                    parEncs.add(new EncoderRef(0, 0));
-                    parEncs.add(new EncoderRef(0, 1));
-                    perpEncs.add(new EncoderRef(0, 2));
-                } else if (md.localizer instanceof TwoDeadWheelLocalizer) {
+                }
+                 else if (md.localizer instanceof TwoDeadWheelLocalizer) {
                     TwoDeadWheelLocalizer dl = (TwoDeadWheelLocalizer) md.localizer;
                     encoderGroups.add(new LynxQuadratureEncoderGroup(
                             hardwareMap.getAll(LynxModule.class),
@@ -229,15 +220,6 @@ public final class TuningOpModes {
                     for (int i = 0; i < dl.rightEncs.size(); i++) {
                         rightEncs.add(new EncoderRef(0, dl.leftEncs.size() + i));
                     }
-                } else if (td.localizer instanceof ThreeDeadWheelLocalizer) {
-                    ThreeDeadWheelLocalizer dl = (ThreeDeadWheelLocalizer) td.localizer;
-                    encoderGroups.add(new LynxQuadratureEncoderGroup(
-                            hardwareMap.getAll(LynxModule.class),
-                            Arrays.asList(dl.par0, dl.par1, dl.perp)
-                    ));
-                    parEncs.add(new EncoderRef(0, 0));
-                    parEncs.add(new EncoderRef(0, 1));
-                    perpEncs.add(new EncoderRef(0, 2));
                 } else if (td.localizer instanceof TwoDeadWheelLocalizer) {
                     TwoDeadWheelLocalizer dl = (TwoDeadWheelLocalizer) td.localizer;
                     encoderGroups.add(new LynxQuadratureEncoderGroup(
