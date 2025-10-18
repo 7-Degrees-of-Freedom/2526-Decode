@@ -1,22 +1,19 @@
 package org.firstinspires.ftc.teamcode.subsystems.intake;
 
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.ServoController;
 import com.sun.tools.javac.util.Pair;
-import  kotlin.Triple;
-public class intake     {
+
+public class Intake {
     private DcMotor intakeMotor;
     private CRServo LIntake;
     private CRServo RIntake;
     private NormalizedColorSensor colorSensor;
     private OpticalDistanceSensor opticalDistanceSensor;
-    public intake(HardwareMap hardwareMap) {
+    public Intake(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         LIntake = hardwareMap.get(CRServo.class, "LIntake");
         RIntake = hardwareMap.get(CRServo.class, "RIntake");
