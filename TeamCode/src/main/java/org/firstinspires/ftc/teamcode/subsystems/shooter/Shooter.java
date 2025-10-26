@@ -26,7 +26,9 @@ public class Shooter {
 }
 
 public void setShooterRPM(double rpm ){
-    shooter.setVelocity(rpm);
+
+     //TODO: CHECK ACTUAL VALUE OF RPM'S, SHOULD BE IN TURN ROTATIONS BUT MIGHT BE IN DEGREES OR RADIANS
+     shooter.setVelocity(rpm);
 }
 
 
