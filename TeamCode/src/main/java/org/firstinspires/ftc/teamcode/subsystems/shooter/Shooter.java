@@ -31,5 +31,8 @@ public void setShooterRPM(double rpm ){
      shooter.setVelocity(rpm);
 }
 
+public void  setPercentOut(double percentOut){
+     shooter.setPower(percentOut);
 
+}
 }

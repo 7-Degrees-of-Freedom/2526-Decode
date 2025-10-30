@@ -250,7 +250,14 @@ public final class MecanumDrive {
 
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
     }
-
+    public void teliOpDrive(double x, double y, double rx){
+         x *= 1.1; // Counteract imperfect strafing
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        leftFront.setPower((y + x + rx)/ denominator);
+        leftBack.setPower((y - x + rx) / denominator);
+        rightFront.setPower((y - x - rx)/denominator);
+        rightBack.setPower((y + x - rx)/ denominator);
+    }
     public void setDrivePowers(PoseVelocity2d powers) {
         MecanumKinematics.WheelVelocities<Time> wheelVels = new MecanumKinematics(1).inverse(
                 PoseVelocity2dDual.constant(powers, 1));
