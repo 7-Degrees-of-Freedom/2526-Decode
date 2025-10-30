@@ -1,5 +1,6 @@
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.vision.LimeLightSubsystem;
 //THIS SITS AGAINST THE GOAL
+@Autonomous
 public class blueCloseSideAuto extends LinearOpMode {
     HardwareMap   hardwareMap;
     //TODO Find way to get pose data from auto in this mode...
