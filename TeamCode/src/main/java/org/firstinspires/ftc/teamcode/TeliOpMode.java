@@ -49,6 +49,5 @@ LimeLightSubsystem limeLightSubsystem = new LimeLightSubsystem(hardwareMap);
         } else {
             shooter.setPercentOut(0);
         }
-
     }
 }}
