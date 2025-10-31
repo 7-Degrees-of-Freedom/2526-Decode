@@ -29,12 +29,22 @@ public class MeepMeepTesting {
                         //       .lineToLinearHeading(new Pose2d(-25,-40,Math.toRadians(220))
 )
                         .build());
+try {
 
+
+        Image img = ImageIO.read(new File("2526-Decode/MeepMeepTesting/src/main/java/com/example/meepmeeptesting/decode_Field.png"));
+
+
+        meepMeep.setBackground(img)
+                .setBackgroundAlpha(0.95f)
+                .setDarkMode(true)
+                .addEntity(myBot).start();}
+        catch(IOException e) {
 
         meepMeep.setBackground(MeepMeep.Background.GRID_BLUE)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
                 .addEntity(myBot)
-                .start();
+                .start();}
     }
 }
