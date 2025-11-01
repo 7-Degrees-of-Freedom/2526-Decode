@@ -1,5 +1,6 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -9,6 +10,8 @@ import org.firstinspires.ftc.teamcode.subsystems.drivetrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.vision.LimeLightSubsystem;
+import org.firstinspires.ftc.teamcode.util.poseTransfer;
+
 @Autonomous
 public class blueSideFarAuto extends LinearOpMode {
 // THIS SITS AGAINST THE WALL, JUST LIKE THE GAME REVEAL
@@ -32,8 +35,11 @@ while(opModeIsActive()){
     limeLightSubsystem.periodic();
     intake.periodic();
     mecanumDrive.actionBuilder(startPose).strafeToLinearHeading(new Vector2d(-25,-40), Math.toRadians(220),null,null).build();
+
+
     //TODO CHECK NEEDED PERCENT OUT
     shooter.setPercentOut(0.5);
+    poseTransfer.autoPose = mecanumDrive.localizer.getPose();
 
 
 }}

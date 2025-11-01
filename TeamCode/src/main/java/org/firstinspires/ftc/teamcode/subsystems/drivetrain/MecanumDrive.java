@@ -258,8 +258,17 @@ public final class MecanumDrive {
         rightFront.setPower((y - x - rx)/denominator);
         rightBack.setPower((y + x - rx)/ denominator);
     }
+    public  void tank(double left, double right){
+        leftFront.setPower(left);
+        leftBack.setPower(left);
+        rightFront.setPower(right);
+        rightBack.setPower(right);
+    }
+    public void alignmentAssist(double val){
+        tank(-val,val);
+    }
     public void setDrivePowers(PoseVelocity2d powers) {
-        MecanumKinematics.WheelVelocities<Time> wheelVels = new MecanumKinematics(1).inverse(
+        MecanumKinematics.WheelVelocities<Time> wheelVels = new MecanumKinematics(14).inverse(
                 PoseVelocity2dDual.constant(powers, 1));
 
         double maxPowerMag = 1;
