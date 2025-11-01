@@ -191,7 +191,7 @@ public class DriveClass {
             Timely(-dist, -dist, dist, dist, 0.2);
         }
     }
-    public void liftNT(int liftPos,double speed){
+  /*  public void liftNT(int liftPos,double speed){
         lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -203,5 +203,5 @@ public class DriveClass {
 
         lift1.setPower(speed);
         lift2.setPower(speed);
-    }
+    }*/
 }

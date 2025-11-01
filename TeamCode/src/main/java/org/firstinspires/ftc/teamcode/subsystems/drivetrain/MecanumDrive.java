@@ -235,7 +235,10 @@ public final class MecanumDrive {
         leftBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        leftBack.setDirection(DcMotor.Direction.FORWARD);
+        rightBack.setDirection(DcMotor.Direction.FORWARD);
         // TODO: reverse motor directions if needed
         //   leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -259,10 +262,10 @@ public final class MecanumDrive {
         rightBack.setPower((y + x - rx)/ denominator);
     }
     public  void tank(double left, double right){
-        leftFront.setPower(left);
+        leftFront.setPower(-left);
         leftBack.setPower(left);
         rightFront.setPower(right);
-        rightBack.setPower(right);
+        rightBack.setPower(-right);
     }
     public void alignmentAssist(double val){
         tank(-val,val);

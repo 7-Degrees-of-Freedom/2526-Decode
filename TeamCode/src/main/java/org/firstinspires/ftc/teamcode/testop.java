@@ -19,6 +19,9 @@ public class testop extends  LinearOpMode {
         MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap,startPose);
 
         waitForStart();
+        while (opModeIsActive()){
+            mecanumDrive.tank(gamepad1.left_stick_y/2,gamepad1.right_stick_y/2);
+        }
 
     }
 }
