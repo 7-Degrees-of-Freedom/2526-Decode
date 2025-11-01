@@ -3,23 +3,22 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
 
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.robocol.RobocolParsable;
 
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.intake.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.vision.LimeLightSubsystem;
+import org.firstinspires.ftc.teamcode.util.poseTransfer;
 
 @TeleOp
-public class TeliOpMode extends LinearOpMode {
+public class blueTeliOp extends LinearOpMode {
     HardwareMap hardwareMap;
     //TODO Find way to get pose data from auto in this mode...
 
-    Pose2d startPose = new Pose2d(0,0,0);
+    Pose2d startPose = poseTransfer.autoPose;
 MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap,startPose);
 Intake intake = new Intake(hardwareMap);
 Shooter shooter = new Shooter(hardwareMap);
@@ -49,5 +48,16 @@ LimeLightSubsystem limeLightSubsystem = new LimeLightSubsystem(hardwareMap);
         } else {
             shooter.setPercentOut(0);
         }
+        if(gamepad1.start){
+            if(limeLightSubsystem.getTag() == 20){
+                mecanumDrive.alignmentAssist(limeLightSubsystem.getTX());
+            }else {
+               double change = (mecanumDrive.localizer.getPose().heading.toDouble() - Math.toRadians(220));
+               if(change > Math.PI) {
+                   change = -change;
+               }
+                mecanumDrive.alignmentAssist(change);
+            }
+         }
     }
 }}

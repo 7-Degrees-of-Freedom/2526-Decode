@@ -49,17 +49,28 @@ public class LimeLightSubsystem {
         this.heading = heading;
     }
     public int getTag() {
-        LLResult results = limeLight.getLatestResult();
+          results = limeLight.getLatestResult();
         if (results != null & results.isValid()) {
             LLResultTypes.FiducialResult fiducialResult = results.getFiducialResults().get(0);
             return fiducialResult.getFiducialId();
         }
         return  -1;
     }
+    public double getTX(){
+        return clamp(results.getTx());
+    }
     public  double getEstDistanceFromGoal(){
           return  (goalHeightfromFloor - limeLightHeightFromFloor) / Math.tan(Math.toRadians(results.getTy()));
     }
-
+    public  double clamp(double val){
+        if(val > 0.5){
+            return 0.5;
+        }
+        if(val < -0.5) {
+            return  -0.5;
+        }
+            return val;
+    }
 
     public  void periodic(){
 
