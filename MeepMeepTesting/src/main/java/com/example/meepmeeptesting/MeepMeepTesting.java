@@ -17,7 +17,7 @@ import javax.imageio.ImageIO;
 public class MeepMeepTesting {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
-waypointPoses
+
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 18)
@@ -25,10 +25,10 @@ waypointPoses
 
 
 
-                                .lineToLinearHeading(new Pose2d(-25,30,Math.toRadians(140))
+                                .lineToLinearHeading(new Pose2d(-25,30,Math.toRadians(140)))
                         //       .lineToLinearHeading(new Pose2d(-25,-40,Math.toRadians(220))
 )
-                        .build());
+                        .build();
 try {
 
 

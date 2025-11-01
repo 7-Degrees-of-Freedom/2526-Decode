@@ -19,17 +19,17 @@ import org.firstinspires.ftc.teamcode.util.poseTransfer;
 
 @TeleOp
 public class redTeliOp extends LinearOpMode {
-    HardwareMap hardwareMap;
     //TODO Find way to get pose data from auto in this mode...
 
-    Pose2d startPose = poseTransfer.autoPose;
-    MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap,startPose);
-    Intake intake = new Intake(hardwareMap);
-    Shooter shooter = new Shooter(hardwareMap);
-    LimeLightSubsystem limeLightSubsystem = new LimeLightSubsystem(hardwareMap);
 
     @Override
     public void  runOpMode() {
+        Pose2d startPose = poseTransfer.autoPose;
+        MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap,startPose);
+        Intake intake = new Intake(hardwareMap);
+        Shooter shooter = new Shooter(hardwareMap);
+        LimeLightSubsystem limeLightSubsystem = new LimeLightSubsystem(hardwareMap);
+
         waitForStart();
         while (opModeIsActive()) {
             double x = gamepad1.left_stick_x;
