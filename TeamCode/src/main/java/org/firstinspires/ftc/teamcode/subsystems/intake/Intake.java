@@ -14,11 +14,11 @@ public class Intake {
     private NormalizedColorSensor colorSensor;
     private OpticalDistanceSensor opticalDistanceSensor;
     public Intake(HardwareMap hardwareMap) {
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
-        LIntake = hardwareMap.get(CRServo.class, "LIntake");
-        RIntake = hardwareMap.get(CRServo.class, "RIntake");
-        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
-        opticalDistanceSensor =  (OpticalDistanceSensor) colorSensor;
+        intakeMotor = hardwareMap.get(DcMotor.class, "intake");
+        LIntake = hardwareMap.get(CRServo.class, "left");
+        RIntake = hardwareMap.get(CRServo.class, "right");
+        //colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
+        //opticalDistanceSensor =  (OpticalDistanceSensor) colorSensor;
 
 
     }
@@ -43,7 +43,7 @@ public class Intake {
 
         return (intakeMotor.getPower() + LIntake.getPower() + RIntake.getPower())/3;
     }
-    public  Pair<Boolean, String>hasArtifact() {
+   /* public  Pair<Boolean, String>hasArtifact() {
         //ARBITRARY THRESHOLD FOR NOW
         if (opticalDistanceSensor.getLightDetected() < 0.1) {
             if (colorSensor.getNormalizedColors().equals(colorSensor.getNormalizedColors().green)) {
@@ -55,8 +55,9 @@ public class Intake {
         }}
          return Pair.of(false, "NONE");
     }
+    */
 public void periodic(){
-        colorSensor.getNormalizedColors();
-        opticalDistanceSensor.getLightDetected();
+        //colorSensor.getNormalizedColors();
+        //opticalDistanceSensor.getLightDetected();
 }
 }

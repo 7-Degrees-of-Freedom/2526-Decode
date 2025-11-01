@@ -19,7 +19,7 @@ public class Shooter {
     private PIDFCoefficients  PID;
  public Shooter(HardwareMap hardwareMap){
      PID = new PIDFCoefficients(P,I,D,F,MotorControlAlgorithm.PIDF);
-    shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+    shooter = hardwareMap.get(DcMotorEx.class, "launcher");
     shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     shooter.setDirection(DcMotorSimple.Direction.FORWARD);
     shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PID);
