@@ -9,14 +9,14 @@ import com.sun.tools.javac.util.Pair;
 
 public class Intake {
     private DcMotor intakeMotor;
-    private CRServo LIntake;
+   private CRServo LIntake;
     private CRServo RIntake;
     private NormalizedColorSensor colorSensor;
     private OpticalDistanceSensor opticalDistanceSensor;
     public Intake(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotor.class, "intake");
-        LIntake = hardwareMap.get(CRServo.class, "left");
-        RIntake = hardwareMap.get(CRServo.class, "right");
+      //  LIntake = hardwareMap.get(CRServo.class, "left");
+       // RIntake = hardwareMap.get(CRServo.class, "right");
         //colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
         //opticalDistanceSensor =  (OpticalDistanceSensor) colorSensor;
 
@@ -24,8 +24,8 @@ public class Intake {
     }
     public void setIntake(Double power) {
         intakeMotor.setPower(power);
-        LIntake.setPower(power);
-        RIntake.setPower(power);
+      //  LIntake.setPower(power);
+      //  RIntake.setPower(power);
     }
     public void setStaticIntake() {
         intakeMotor.setPower(0.5);

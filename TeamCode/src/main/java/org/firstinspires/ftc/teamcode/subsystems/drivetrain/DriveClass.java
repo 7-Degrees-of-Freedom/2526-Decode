@@ -13,8 +13,8 @@ public class DriveClass {
     private DcMotor backleftAsDcMotor;
     private DcMotor frontrightAsDcMotor;
     private DcMotor backrightAsDcMotor;
-    private DcMotor lift1;
-    private DcMotor lift2;
+
+
 
     private IMU imu;
     double botHeading;
@@ -23,8 +23,6 @@ public class DriveClass {
         backleftAsDcMotor = hwMap.get(DcMotor.class, "backleft");
         frontrightAsDcMotor = hwMap.get(DcMotor.class, "frontright");
         backrightAsDcMotor = hwMap.get(DcMotor.class, "backright");
-        lift1 = hwMap.get(DcMotor.class, "lift1");
-        lift2 = hwMap.get(DcMotor.class, "lift2");
         imu = hwMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
