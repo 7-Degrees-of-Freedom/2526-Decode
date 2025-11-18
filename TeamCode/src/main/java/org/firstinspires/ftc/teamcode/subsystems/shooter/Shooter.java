@@ -25,12 +25,14 @@ public class Shooter {
     shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PID);
 }
 
-public void setShooterRPM(double rpm ){
+public void setShooterMPS(double MPS ){
 
-     //TODO: CHECK ACTUAL VALUE OF RPM'S, SHOULD BE IN TURN ROTATIONS BUT MIGHT BE IN DEGREES OR RADIANS
-     shooter.setVelocity(rpm);
+     //TODO: CHECK ACTUAL VALUE OF MPS, SHOULD BE IN TURN ROTATIONS BUT MIGHT BE IN DEGREES OR RADIANS
+     shooter.setVelocity(MPS);
 }
-
+public  double getShooterMPS(){
+     return shooter.getVelocity();
+}
 public void  setPercentOut(double percentOut){
      shooter.setPower(percentOut);
 

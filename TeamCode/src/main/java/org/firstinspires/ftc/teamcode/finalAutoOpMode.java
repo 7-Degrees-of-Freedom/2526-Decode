@@ -37,8 +37,9 @@ public class finalAutoOpMode extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
-        timer.startTime();
+
         if (opModeIsActive()) {
+            timer.startTime();
             shoot.setPower(1);
             if(timer.time() <= 0.2) {
                 intake.setPower(-0.05);
