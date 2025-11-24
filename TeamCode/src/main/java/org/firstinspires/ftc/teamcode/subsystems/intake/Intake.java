@@ -8,14 +8,27 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.sun.tools.javac.util.Pair;
 
 public class Intake {
+    public enum intakeState{
+        INTAKE,
+        OUTTAKE,
+        SLOW_INTAKE,
+        SLOW_OUTTAKE,
+        SMART_INTAKE,
+        STOP
+    }
+
     private DcMotor intakeMotor;
    private CRServo LIntake;
     private CRServo RIntake;
     private NormalizedColorSensor colorSensor;
     private OpticalDistanceSensor opticalDistanceSensor;
+    private intakeState _stateMachine = intakeState.STOP;
     public Intake(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.get(DcMotor.class, "intake");
-      //  LIntake = hardwareMap.get(CRServo.class, "left");
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        //  LIntake = hardwareMap.get(CRServo.class, "left");
        // RIntake = hardwareMap.get(CRServo.class, "right");
         //colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
         //opticalDistanceSensor =  (OpticalDistanceSensor) colorSensor;
@@ -39,6 +52,27 @@ public class Intake {
         RIntake.setPower(0);
 
     }
+    private  void stateMachine() {
+        switch (_stateMachine) {
+            case INTAKE:
+                setIntake(1.0);
+                break;
+            case OUTTAKE:
+                setIntake(-1.0);
+                break;
+            case SLOW_INTAKE:
+                setIntake(-0.5);
+                break;
+            case SLOW_OUTTAKE:
+                setIntake(-0.5);
+                break;
+
+            case STOP:
+                stopIntake();
+                break;
+        }}
+    public void setIntakeState(intakeState state) {}
+
     public Double motorOutputAvg(){
 
         return (intakeMotor.getPower() + LIntake.getPower() + RIntake.getPower())/3;
@@ -49,7 +83,7 @@ public class Intake {
             if (colorSensor.getNormalizedColors().equals(colorSensor.getNormalizedColors().green)) {
                 return Pair.of(true, "GREEN");
             }
-        // IDK MAYBE IT WILL COUNT FOR PURPLE LOL
+        // IDK MAYBE IT WILL COUNT FOR PURPLE
         else if (colorSensor.getNormalizedColors().equals(colorSensor.getNormalizedColors().blue)) {
             return Pair.of(true, "PURPLE");
         }}
@@ -57,6 +91,7 @@ public class Intake {
     }
     */
 public void periodic(){
+        stateMachine();
         //colorSensor.getNormalizedColors();
         //opticalDistanceSensor.getLightDetected();
 }
