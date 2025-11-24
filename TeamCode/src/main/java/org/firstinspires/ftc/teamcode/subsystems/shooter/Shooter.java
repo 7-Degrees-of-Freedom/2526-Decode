@@ -17,14 +17,31 @@ public class Shooter {
     private  double D = 0.5;
     private double F = 0.001;
     private PIDFCoefficients  PID;
+    private char Mode = 'P';
+    private double value = 0;
  public Shooter(HardwareMap hardwareMap){
      PID = new PIDFCoefficients(P,I,D,F,MotorControlAlgorithm.PIDF);
     shooter = hardwareMap.get(DcMotorEx.class, "launcher");
     shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     shooter.setDirection(DcMotorSimple.Direction.REVERSE);
     shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PID);
-}
 
+}
+//V vel P Per
+public void setMode(char mode, double value){
+
+     switch(mode) {
+         case 'P':
+             this.Mode = 'P';
+             this.value = value;
+             break;
+         case 'V':
+              this.Mode = 'V';
+              this.value = value;
+              break;
+
+     }}
 public void setShooterMPS(double MPS ){
 
      //TODO: CHECK ACTUAL VALUE OF MPS, SHOULD BE IN TURN ROTATIONS BUT MIGHT BE IN DEGREES OR RADIANS
@@ -36,5 +53,15 @@ public  double getShooterMPS(){
 public void  setPercentOut(double percentOut){
      shooter.setPower(percentOut);
 
+}
+public  void periodic(){
+     switch(Mode){
+         case 'P':
+             shooter.setPower(value);
+             break;
+         case 'V':
+             shooter.setVelocity(value);
+             break;
+     }
 }
 }
