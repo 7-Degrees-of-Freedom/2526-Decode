@@ -11,6 +11,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Shooter {
     private DcMotorEx shooter;
+    private DcMotorEx shooter_2;
+
     //ARBITRARY PID CONSTANTS // TODO: CHANGE FOR TUNING
     private double P = 3;
     private  double I = 0;
@@ -22,12 +24,19 @@ public class Shooter {
  public Shooter(HardwareMap hardwareMap){
      PID = new PIDFCoefficients(P,I,D,F,MotorControlAlgorithm.PIDF);
     shooter = hardwareMap.get(DcMotorEx.class, "launcher");
-    shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+     shooter_2 = hardwareMap.get(DcMotorEx.class, "launcher2");
+
+     shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     shooter.setDirection(DcMotorSimple.Direction.REVERSE);
     shooter.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PID);
+     shooter_2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+     shooter_2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+     shooter_2.setDirection(DcMotorSimple.Direction.REVERSE);
+     shooter_2.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,PID);
 
-}
+
+ }
 //V vel P Per
 public void setMode(char mode, double value){
 
@@ -46,12 +55,15 @@ public void setShooterMPS(double MPS ){
 
      //TODO: CHECK ACTUAL VALUE OF MPS, SHOULD BE IN TURN ROTATIONS BUT MIGHT BE IN DEGREES OR RADIANS
      shooter.setVelocity(MPS);
-}
+    shooter_2.setVelocity(MPS);
+
+ }
 public  double getShooterMPS(){
      return shooter.getVelocity();
 }
 public void  setPercentOut(double percentOut){
      shooter.setPower(percentOut);
+     shooter_2.setPower(percentOut);
 
 }
 public  void periodic(){
