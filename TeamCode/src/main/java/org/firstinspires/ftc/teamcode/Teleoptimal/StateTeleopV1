@@ -101,7 +101,7 @@ public class StateTeleopV1 extends LinearOpMode {
         //Lift toggle state variables
         boolean rtPressed = false;
         boolean rtLastPressed = false;
-        boolean liftUp = fasle;
+        boolean liftUp = false;
 
         //Encoder targets need adjustments later
         int LIFT_UP_POS = 1500;
