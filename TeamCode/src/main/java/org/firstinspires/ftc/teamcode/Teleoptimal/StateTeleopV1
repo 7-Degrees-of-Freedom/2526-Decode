@@ -222,11 +222,11 @@ public class StateTeleopV1 extends LinearOpMode {
                 intake.setPower(0);
             }
 
-// stopper
+// transferstopper
             if (gamepad2.a) {
-                //stopper.setPosition(0.45);
+                //transferstopper.setPosition(0.45);
             } else {
-                //stopper.setPosition(0);
+                //transferstopper.setPosition(0);
             }
  // lifts
             if (gamepad1.right_trigger > 0.2) {
