@@ -40,7 +40,7 @@ public class StateTeleopV1 extends LinearOpMode {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         llift = hardwareMap.get(DcMotorEx.class, "llift");
         rlift = hardwareMap.get(DcMotorEx.class, "rlift");
-        //stopper = hardwareMap.get(Servo.class, "stopper");
+        //transferstopper = hardwareMap.get(Servo.class, "transferstopper");
 
 
 
@@ -58,8 +58,13 @@ public class StateTeleopV1 extends LinearOpMode {
         backright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rlift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        llift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Lift encoder reset and Run to postition
+        llift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rlift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        rlift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Configure motor response when power is 0.0.
         frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -86,12 +91,21 @@ public class StateTeleopV1 extends LinearOpMode {
         limelight.pipelineSwitch(0);
         limelight.start();
 
-        //stopper.setDirection(Servo.Direction.FORWARD);
+        //transferstopper.setDirection(Servo.Direction.FORWARD);
 
 
         // Inform the user that everything has been initialized.
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        //Lift toggle state variables
+        boolean rtPressed = false;
+        boolean rtLastPressed = false;
+        boolean liftUp = fasle;
+
+        //Encoder targets need adjustments later
+        int LIFT_UP_POS = 1500;
+        int LIFT_DOWN_POS = 0;
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -229,13 +243,25 @@ public class StateTeleopV1 extends LinearOpMode {
                 //transferstopper.setPosition(0);
             }
  // lifts
-            if (gamepad1.right_trigger > 0.2) {
-                llift.setPower(0.95);
-                rlift.setPower(0.95);
+ //RUN_TO_POSITION Lift Toggle thingy
+        rtPressed = gamepad1.right_trigger > 0.2;
+
+        if (rtPressed && !rtLastPressed) {
+            liftUp = !liftup;
+
+            if (liftUp) {
+                llift.setTargetPosition(LIFT_UP_POS);
+                rlift.setTargetPosition(LIFT_UP_POS);
             } else {
-                llift.setPower(0);
-                rlift.setPower(0);
+                llift.setTargetPosition(LIFT_DOWN_POS);
+                rlift.setTargetPosition(LIFT_DOWN_POS);
             }
+           
+            llift.setPower(1.0);
+            rlift.setPower(1.0);
         }
+
+        rtLastPressed = rtPressed;
     }
+}
 }
