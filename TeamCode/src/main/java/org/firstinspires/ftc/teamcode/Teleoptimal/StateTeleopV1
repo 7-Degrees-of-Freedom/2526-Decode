@@ -1,0 +1,241 @@
+package org.firstinspires.ftc.teamcode.Teleop;
+
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+
+
+@TeleOp()
+public class StateTeleopV1 extends LinearOpMode {
+    // Declare motors as a private
+    public DcMotorEx frontleft, frontright, backleft, backright;
+    public DcMotorEx launcher, intake;
+    public DcMotorEx llift, rlift;
+
+    public Servo stopper;
+    public Limelight3A limelight;
+
+    double f_x;
+    double f_y;
+    double f_r;
+    double LRPM;
+
+    @Override
+    public void runOpMode() {
+        // Inform the user that the program is initializing.
+        telemetry.addData("Status", "Initializing...");
+        telemetry.update();
+
+        // Get motors from hardwareMap.
+        frontleft = hardwareMap.get(DcMotorEx.class, "frontleft");
+        frontright = hardwareMap.get(DcMotorEx.class, "frontright");
+        backright = hardwareMap.get(DcMotorEx.class, "backright");
+        backleft = hardwareMap.get(DcMotorEx.class, "backleft");
+        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        llift = hardwareMap.get(DcMotorEx.class, "llift");
+        rlift = hardwareMap.get(DcMotorEx.class, "rlift");
+        //stopper = hardwareMap.get(Servo.class, "stopper");
+
+
+
+
+        double speed = 0.5;
+        int mode = 2;
+        //wave = hardwareMap.get(DcMotor.class, "wave");
+        //imu = hardwareMap.get(BNO055IMU.class, "imu");
+        //BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        // Configure motors to go to velocity/power/position.
+        frontleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rlift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        llift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Configure motor response when power is 0.0.
+        frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rlift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        llift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Set the motor directions.
+        frontleft.setDirection(DcMotor.Direction.FORWARD);
+        frontright.setDirection(DcMotor.Direction.REVERSE);
+        backleft.setDirection(DcMotor.Direction.FORWARD);
+        backright.setDirection(DcMotor.Direction.REVERSE);
+        launcher.setDirection(DcMotor.Direction.REVERSE);
+        intake.setDirection(DcMotor.Direction.FORWARD);
+        llift.setDirection(DcMotor.Direction.FORWARD);
+        rlift.setDirection(DcMotor.Direction.FORWARD);
+
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
+
+        //stopper.setDirection(Servo.Direction.FORWARD);
+
+
+        // Inform the user that everything has been initialized.
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+
+        // run until the end of the match (driver presses STOP)
+        while (opModeIsActive()) {
+
+            telemetry.addData("Status", "Running");
+            // Create motion vector;
+            f_x = gamepad1.left_stick_x;
+            f_y = gamepad1.left_stick_y;
+
+            boolean autoRotate = gamepad1.left_trigger > 0.2;
+            LLResult result = limelight.getLatestResult();
+
+            if (autoRotate) {
+
+                if (result != null && result.isValid()) {
+                    double tx = result.getTx();
+                    double kP_turn = 0.02;
+                    f_r = kP_turn * tx;
+
+                    f_r = Math.max(-0.5, Math.min(0.5, f_r));
+
+
+                    telemetry.addData("AutoRotate", "ACTIVE");
+                    telemetry.addData("tx", tx);
+
+                } else {
+                    telemetry.addData("AutoRotate", "NO TARGET");
+                }
+            } else {
+                f_r = gamepad1.right_stick_x;
+                if (-0.01 < f_r && f_r < 0.01) {
+                    f_r = 0;
+                }
+            }
+
+            boolean speed_bot = gamepad1.y;
+            boolean slow_bot = gamepad1.a;
+            boolean reg_bot = gamepad1.b;
+            boolean talha = gamepad1.x;
+
+
+            double intakeRPM = 1000;
+            // Give controller joysticks a deadzone.
+            if (-0.1 < f_x && f_x < 0.1) {
+                f_x = 0;
+            }
+            if (-0.1 < f_y && f_y < 0.1) {
+                f_y = 0;
+            }
+
+
+            // Apply weights to each component, such that when
+            // f_x and f_y are 45* on a unit circle and f_r is
+            // maxed out in a direction, each motor power adds
+            // up to 1.0.
+            double x = -f_x;
+            double y = -f_y;
+            double rot = f_r;
+
+            double fl = y + x + rot;
+            double fr = y - x - rot;
+            double bl = y - x + rot;
+            double br = y + x - rot;
+
+// normalize, we can only have a maximum motor power of 1
+
+
+            fl *= 1;
+            fr *= 1;
+            bl *= 1;
+            br *= 1;
+
+
+
+
+            if (slow_bot){
+                speed = 0.3;
+                mode = 1;
+            }
+            if (reg_bot){
+                speed = 0.5;
+                mode = 2;
+            }
+            if (speed_bot){
+                speed = 0.7;
+                mode = 3;
+            }
+            if (talha){
+                speed = 1.0;
+                mode = 4;
+            }
+
+
+            frontleft.setPower(fl * speed);
+            frontright.setPower(fr * speed);
+            backleft.setPower(bl * speed);
+            backright.setPower(br * speed);
+
+
+// launcher
+            LRPM = 900;
+            if (gamepad2.dpad_right) {
+                LRPM += 50;
+            } else if (gamepad2.dpad_left) {
+                LRPM -= 50;
+            } else if (gamepad2.dpad_up) {
+                LRPM += 200;
+            } else if (gamepad2.dpad_down) {
+                LRPM -= 200;
+            }
+            if (gamepad2.right_trigger > 0.1) {
+                launcher.setVelocity(LRPM);
+            } else if (gamepad2.left_trigger > 0.1) {
+                launcher.setPower(-0.5);
+            } else {
+                launcher.setPower(0);
+            }
+
+// intake
+            if (gamepad2.right_bumper) {
+                intake.setVelocity(intakeRPM);
+            } else if (gamepad2.left_bumper) {
+                intake.setPower(-0.5);
+            } else {
+                intake.setPower(0);
+            }
+
+// stopper
+            if (gamepad2.a) {
+                //stopper.setPosition(0.45);
+            } else {
+                //stopper.setPosition(0);
+            }
+ // lifts
+            if (gamepad1.right_trigger > 0.2) {
+                llift.setPower(0.95);
+                rlift.setPower(0.95);
+            } else {
+                llift.setPower(0);
+                rlift.setPower(0);
+            }
+        }
+    }
+}
