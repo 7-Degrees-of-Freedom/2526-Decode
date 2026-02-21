@@ -252,16 +252,34 @@ public class StateTeleopV1 extends LinearOpMode {
             if (liftUp) {
                 llift.setTargetPosition(LIFT_UP_POS);
                 rlift.setTargetPosition(LIFT_UP_POS);
+
+                llift.setPower(1.0);
+                rlift.setPower(1.0);
             } else {
                 llift.setTargetPosition(LIFT_DOWN_POS);
                 rlift.setTargetPosition(LIFT_DOWN_POS);
+
+                llift.setPower(-1.0);
+                rlift.setPower(-1.0);
             }
-           
-            llift.setPower(1.0);
-            rlift.setPower(1.0);
         }
 
         rtLastPressed = rtPressed;
+
+        //Stop when at target
+        int leftPos = llift.getCurrentPosition();
+        int rightPos = rlift.getCurrentPosition();
+
+        int leftTarget = llift.getTargetPosition();
+        int rightTarget = rlift.getTargetPosition();
+
+        int tolerance = 100;
+
+        //If both sides are at their targets, stop motors
+        if (Math.abs(leftPos - leftTarget) < tolerance &&
+            Math.abs(rightPos - rightTarget) < tolerance) {
+            llift.setPower(0);
+            rlift.setPower(0);
     }
 }
 }
