@@ -12,18 +12,38 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 @TeleOp()
 public class StateTeleopV1 extends LinearOpMode {
+
     // Declare motors as a private
     public DcMotorEx frontleft, frontright, backleft, backright;
     public DcMotorEx launcher, intake;
     public DcMotorEx llift, rlift;
 
-    public Servo stopper;
+    public Servo stopper, RSL;
     public Limelight3A limelight;
 
+    // drive variables 
     double f_x;
     double f_y;
     double f_r;
-    double LRPM;
+    double speed = 0.5;
+    int mode = 2;
+
+    // Launcher/RSL variables
+    double LRPM = 900;
+    double RSLhue = 0.62;
+    double fasttoll = 180;
+	double slowtoll = 75;
+
+    //Intake Speed
+
+    //Lift variables
+    //Encoder targets need adjustments later
+    int LIFT_UP_POS = 1500;
+    int LIFT_DOWN_POS = 0;
+    //Lift toggle state variables
+    boolean rtPressed = false;
+    boolean rtLastPressed = false;
+    boolean liftUp = false;
 
     @Override
     public void runOpMode() {
@@ -40,13 +60,9 @@ public class StateTeleopV1 extends LinearOpMode {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         llift = hardwareMap.get(DcMotorEx.class, "llift");
         rlift = hardwareMap.get(DcMotorEx.class, "rlift");
+        RSL = hardwareMap.get(Servo.class, "RSL");
         //transferstopper = hardwareMap.get(Servo.class, "transferstopper");
 
-
-
-
-        double speed = 0.5;
-        int mode = 2;
         //wave = hardwareMap.get(DcMotor.class, "wave");
         //imu = hardwareMap.get(BNO055IMU.class, "imu");
         //BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -62,6 +78,10 @@ public class StateTeleopV1 extends LinearOpMode {
         // Lift encoder reset and Run to postition
         llift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rlift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        
+        
+        llift.setTargetPosition(LIFT_DOWN_POS);
+        rlift.setTargetPosition(LIFT_DOWN_POS);
 
         rlift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -85,27 +105,15 @@ public class StateTeleopV1 extends LinearOpMode {
         intake.setDirection(DcMotor.Direction.FORWARD);
         llift.setDirection(DcMotor.Direction.FORWARD);
         rlift.setDirection(DcMotor.Direction.FORWARD);
-
+        //transferstopper.setDirection(Servo.Direction.FORWARD);
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(0);
         limelight.start();
 
-        //transferstopper.setDirection(Servo.Direction.FORWARD);
-
-
-        // Inform the user that everything has been initialized.
+          // Inform the user that everything has been initialized.
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
-        //Lift toggle state variables
-        boolean rtPressed = false;
-        boolean rtLastPressed = false;
-        boolean liftUp = false;
-
-        //Encoder targets need adjustments later
-        int LIFT_UP_POS = 1500;
-        int LIFT_DOWN_POS = 0;
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -209,7 +217,7 @@ public class StateTeleopV1 extends LinearOpMode {
 
 
 // launcher
-            LRPM = 900;
+            
             if (gamepad2.dpad_right) {
                 LRPM += 50;
             } else if (gamepad2.dpad_left) {
@@ -226,6 +234,24 @@ public class StateTeleopV1 extends LinearOpMode {
             } else {
                 launcher.setPower(0);
             }
+// RSL 
+
+
+            double actualLRPM = launcher.getVelocity();
+			double error = actualLRPM - LRPM;
+
+			boolean LauncherReady =	 error >= -slowtoll && error <= fasttoll;
+       		
+            if (LauncherReady) {
+                RSL.setPosition(RSLhue);
+            } else if(gamepad2.right_trigger > 0.1){
+                RSL.setPosition(0.3);
+            } else if(actualLRPM < 0){
+                RSL.setPosition(0.5);
+            } else {
+                RSL.setPosition(0);
+            }
+            
 
 // intake
             if (gamepad2.right_bumper) {
@@ -244,6 +270,8 @@ public class StateTeleopV1 extends LinearOpMode {
             }
  // lifts
  //RUN_TO_POSITION Lift Toggle thingy
+ 
+         
         rtPressed = gamepad1.right_trigger > 0.2;
 
         if (rtPressed && !rtLastPressed) {
@@ -280,6 +308,7 @@ public class StateTeleopV1 extends LinearOpMode {
             Math.abs(rightPos - rightTarget) < tolerance) {
             llift.setPower(0);
             rlift.setPower(0);
+        }
     }
 }
 }
