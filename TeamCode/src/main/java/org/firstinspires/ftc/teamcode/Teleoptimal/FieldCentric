@@ -9,13 +9,14 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.acmerobotics.roadrunner.Vector2d; 
-
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit; 
+import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
 @TeleOp()
 public class StateTeleopV1 extends LinearOpMode {
 
     // Declare motors as a private
-    public DcMotorEx frontleft, frontright, backleft, backright;
+	MecanumDrive drive;
     public DcMotorEx launcher, intake;
     public DcMotorEx llift, rlift;
     GobildaPinpointDriver odo;
@@ -54,10 +55,6 @@ public class StateTeleopV1 extends LinearOpMode {
         telemetry.update();
 
         // Get motors from hardwareMap.
-        frontleft = hardwareMap.get(DcMotorEx.class, "frontleft");
-        frontright = hardwareMap.get(DcMotorEx.class, "frontright");
-        backright = hardwareMap.get(DcMotorEx.class, "backright");
-        backleft = hardwareMap.get(DcMotorEx.class, "backleft");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         llift = hardwareMap.get(DcMotorEx.class, "llift");
@@ -65,16 +62,13 @@ public class StateTeleopV1 extends LinearOpMode {
         RSL = hardwareMap.get(Servo.class, "RSL");
         //transferstopper = hardwareMap.get(Servo.class, "transferstopper");
         odo = hardwareMap.get(GobildaPinpointDriver.class, "odo");
+		drive = new MecanumDrive(hardwareMap);
 
         //wave = hardwareMap.get(DcMotor.class, "wave");
         //imu = hardwareMap.get(BNO055IMU.class, "imu");
         //BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
         // Configure motors to go to velocity/power/position.
-        frontleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -90,20 +84,11 @@ public class StateTeleopV1 extends LinearOpMode {
         llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Configure motor response when power is 0.0.
-        frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rlift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         llift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Set the motor directions.
-        frontleft.setDirection(DcMotor.Direction.FORWARD);
-        frontright.setDirection(DcMotor.Direction.REVERSE);
-        backleft.setDirection(DcMotor.Direction.FORWARD);
-        backright.setDirection(DcMotor.Direction.REVERSE);
         launcher.setDirection(DcMotor.Direction.REVERSE);
         intake.setDirection(DcMotor.Direction.FORWARD);
         llift.setDirection(DcMotor.Direction.FORWARD);
@@ -116,7 +101,7 @@ public class StateTeleopV1 extends LinearOpMode {
 
         odo.setOffsets(0, -168);
         odo.setEncoderResolution(GobildaPinpointDriver.GobildaOdometryPods.goBILDA_4_BAR_POD);
-        odo.setEndoderDirections(GobildaPinpointDriver.EncoderDirection.FORWARD, GobildaPinpointDriver.EncoderDirection.FORWARD,);
+        odo.setEndoderDirections(GobildaPinpointDriver.EncoderDirection.FORWARD, GobildaPinpointDriver.EncoderDirection.FORWARD);
       
         //starting pos
         odo.resetPosAndIMU();
@@ -138,43 +123,20 @@ public class StateTeleopV1 extends LinearOpMode {
 
             telemetry.addData("Status", "Running");
             // Create motion vector;
-            f_x = gamepad1.left_stick_x;
-            f_y = -gamepad1.left_stick_y;
+            x = gamepad1.left_stick_x;
+            y = -gamepad1.left_stick_y;
 
             boolean autoRotate = gamepad1.left_trigger > 0.2;
             LLResult result = limelight.getLatestResult();
-            if (gamepad1.rightbumper) {
-                positionLocked = !positionLocked;
-                if (positionLocked) {
-                    // Grab current position the moment you press the button
-                    lockPose = drive.pose; 
-                }
-                sleep(50); // Simple debounce so it doesn't flicker
-          }
-          Double DefMult = 1.5
-          if (positionLocked) {
-             drive.updatePoseEstimate();
-             PoseVelocity2d feedback = drive.computeFeedback(lockPose);
-  
-            PoseVelocity2d boostedPower = new PoseVelocity2d(
-                new Vector2d(
-                    feedback.linearVel.x * DefMult,
-                    feedback.linearVel.y * DefMult
-        ),
-        feedback.angVel * DefMult
-    );
 
-    // 4. Send the command to the motors
-    drive.setDrivePowers(boostedPower);
-
-          } else if (autoRotate) {
+        if (autoRotate) {
 
                 if (result != null && result.isValid()) {
                     double tx = result.getTx();
                     double kP_turn = 0.02;
-                    f_r = kP_turn * tx;
+                    turn = kP_turn * tx;
 
-                    f_r = Math.max(-0.5, Math.min(0.5, f_r));
+                    turn = Math.max(-0.5, Math.min(0.5, turn));
 
 
                     telemetry.addData("AutoRotate", "ACTIVE");
@@ -184,9 +146,9 @@ public class StateTeleopV1 extends LinearOpMode {
                     telemetry.addData("AutoRotate", "NO TARGET");
                 }
             } else {
-                f_r = gamepad1.right_stick_x;
-                if (-0.1 < f_r && f_r < 0.1) {
-                    f_r = 0;
+                turn = gamepad1.right_stick_x;
+                if (-0.1 < turn && turn < 0.1) {
+                    turn = 0;
                 }
             }
 
@@ -198,11 +160,11 @@ public class StateTeleopV1 extends LinearOpMode {
 
             double intakeRPM = 1000;
             // Give controller joysticks a deadzone.
-            if (-0.1 < f_x && f_x < 0.1) {
-                f_x = 0;
+            if (-0.1 < x && x < 0.1) {
+                x = 0;
             }
-            if (-0.1 < f_y && f_y < 0.1) {
-                f_y = 0;
+            if (-0.1 < y && y < 0.1) {
+                y = 0;
             }
 
 
@@ -210,27 +172,12 @@ public class StateTeleopV1 extends LinearOpMode {
             // f_x and f_y are 45* on a unit circle and f_r is
             // maxed out in a direction, each motor power adds
             // up to 1.0.
-            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-            // Rotate the movement direction counter to the bot's rotation
-            double x = f_x * Math.cos(-botHeading) - f_y * Math.sin(-botHeading);
-            double y = f_x * Math.sin(-botHeading) + f_y * Math.cos(-botHeading);
-
-            x = x * 1.1;  // Counteract imperfect strafing
 
 // normalize, we can only have a maximum motor power of 1
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(f_r), 1);
 
-            double fl = y + x + rot;
-            double fr = y - x - rot;
-            double bl = y - x + rot;
-            double br = y + x - rot;
-
-
-
-
-
-
+          
             if (slow_bot){
                 speed = 0.2;
                 mode = 1;
@@ -247,12 +194,46 @@ public class StateTeleopV1 extends LinearOpMode {
                 speed = 1.0;
                 mode = 4;
             }
+x *= speed;
+y *= speed;
+turn *= speed;
+
+Vector2d input = new Vector2d(x, y);
+
+// field centric
+Vector2d fieldInput = input.rotated(-drive.pose.heading.toDouble());
 
 
-            frontleft.setPower(fl * speed / denominator);
-            frontright.setPower(fr * speed / denominator);
-            backleft.setPower(bl * speed / denominator);
-            backright.setPower(br * speed / denominator);
+			boolean positionLocked = false;
+			Pose2d lockPose;
+            if (gamepad1.right_bumper) {
+                positionLocked = !positionLocked;
+                if (positionLocked) {
+                    // Grab current position the moment you press the button
+                    lockPose = drive.pose; 
+                }
+                sleep(50); // Simple debounce so it doesn't flicker
+          }
+          double DefMult = 1.5;
+          if (positionLocked) {
+             drive.updatePoseEstimate();
+             PoseVelocity2d feedback = drive.computeFeedback(lockPose);
+  
+            PoseVelocity2d boostedPower = new PoseVelocity2d(
+                new Vector2d(
+                    feedback.linearVel.x * DefMult,
+                    feedback.linearVel.y * DefMult
+      			),
+       			feedback.angVel * DefMult
+    	);
+
+   		 // Send the command to the motors
+   		drive.setDrivePowers(boostedPower);
+		} else {
+				drive.setDrivePowers(
+    				new PoseVelocity2d(fieldInput, turn)
+				); }
+
 
 
 // launcher
@@ -314,7 +295,7 @@ public class StateTeleopV1 extends LinearOpMode {
         rtPressed = gamepad1.right_trigger > 0.2;
 
         if (rtPressed && !rtLastPressed) {
-            liftUp = !liftup;
+            liftUp = !liftUp;
 
             if (liftUp) {
                 llift.setTargetPosition(LIFT_UP_POS);
@@ -326,8 +307,8 @@ public class StateTeleopV1 extends LinearOpMode {
                 llift.setTargetPosition(LIFT_DOWN_POS);
                 rlift.setTargetPosition(LIFT_DOWN_POS);
 
-                llift.setPower(-1.0);
-                rlift.setPower(-1.0);
+                llift.setPower(1.0);
+                rlift.setPower(1.0);
             }
         }
 
