@@ -1,0 +1,353 @@
+package org.firstinspires.ftc.teamcode.Teleop;
+
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.acmerobotics.roadrunner.Vector2d; 
+
+
+@TeleOp()
+public class StateTeleopV1 extends LinearOpMode {
+
+    // Declare motors as a private
+    public DcMotorEx frontleft, frontright, backleft, backright;
+    public DcMotorEx launcher, intake;
+    public DcMotorEx llift, rlift;
+    GobildaPinpointDriver odo;
+
+    public Servo stopper, RSL;
+    public Limelight3A limelight;
+
+    // drive variables 
+    double f_x;
+    double f_y;
+    double f_r;
+    double speed = 0.5;
+    int mode = 2;
+
+    // Launcher/RSL variables
+    double LRPM = 900;
+    double RSLhue = 0.62;
+    double fasttoll = 180;
+	double slowtoll = 75;
+
+    //Intake Speed
+
+    //Lift variables
+    //Encoder targets need adjustments later
+    int LIFT_UP_POS = 1500;
+    int LIFT_DOWN_POS = 0;
+    //Lift toggle state variables
+    boolean rtPressed = false;
+    boolean rtLastPressed = false;
+    boolean liftUp = false;
+
+    @Override
+    public void runOpMode() {
+        // Inform the user that the program is initializing.
+        telemetry.addData("Status", "Initializing...");
+        telemetry.update();
+
+        // Get motors from hardwareMap.
+        frontleft = hardwareMap.get(DcMotorEx.class, "frontleft");
+        frontright = hardwareMap.get(DcMotorEx.class, "frontright");
+        backright = hardwareMap.get(DcMotorEx.class, "backright");
+        backleft = hardwareMap.get(DcMotorEx.class, "backleft");
+        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+        llift = hardwareMap.get(DcMotorEx.class, "llift");
+        rlift = hardwareMap.get(DcMotorEx.class, "rlift");
+        RSL = hardwareMap.get(Servo.class, "RSL");
+        //transferstopper = hardwareMap.get(Servo.class, "transferstopper");
+        odo = hardwareMap.get(GobildaPinpointDriver.class, "odo");
+
+        //wave = hardwareMap.get(DcMotor.class, "wave");
+        //imu = hardwareMap.get(BNO055IMU.class, "imu");
+        //BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+
+        // Configure motors to go to velocity/power/position.
+        frontleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backleft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backright.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Lift encoder reset and Run to postition
+        llift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rlift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        
+        
+        llift.setTargetPosition(LIFT_DOWN_POS);
+        rlift.setTargetPosition(LIFT_DOWN_POS);
+
+        rlift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        llift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        // Configure motor response when power is 0.0.
+        frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rlift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        llift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        // Set the motor directions.
+        frontleft.setDirection(DcMotor.Direction.FORWARD);
+        frontright.setDirection(DcMotor.Direction.REVERSE);
+        backleft.setDirection(DcMotor.Direction.FORWARD);
+        backright.setDirection(DcMotor.Direction.REVERSE);
+        launcher.setDirection(DcMotor.Direction.REVERSE);
+        intake.setDirection(DcMotor.Direction.FORWARD);
+        llift.setDirection(DcMotor.Direction.FORWARD);
+        rlift.setDirection(DcMotor.Direction.FORWARD);
+        //transferstopper.setDirection(Servo.Direction.FORWARD);
+
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        limelight.start();
+
+        odo.setOffsets(0, -168);
+        odo.setEncoderResolution(GobildaPinpointDriver.GobildaOdometryPods.goBILDA_4_BAR_POD);
+        odo.setEndoderDirections(GobildaPinpointDriver.EncoderDirection.FORWARD, GobildaPinpointDriver.EncoderDirection.FORWARD,);
+      
+        //starting pos
+        odo.resetPosAndIMU();
+
+          // Inform the user that everything has been initialized.
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+
+        // run until the end of the match (driver presses STOP)
+        while (opModeIsActive()) {
+        drive.updatePoseEstimate(); 
+        if (gamepad1.options){
+            odo.resetPosAndIMU(); //resets the position to 0 and recalibrates the IMU
+        }
+
+
+            telemetry.addData("Status", "Running");
+            // Create motion vector;
+            f_x = gamepad1.left_stick_x;
+            f_y = -gamepad1.left_stick_y;
+
+            boolean autoRotate = gamepad1.left_trigger > 0.2;
+            LLResult result = limelight.getLatestResult();
+            if (gamepad1.rightbumper) {
+                positionLocked = !positionLocked;
+                if (positionLocked) {
+                    // Grab current position the moment you press the button
+                    lockPose = drive.pose; 
+                }
+                sleep(50); // Simple debounce so it doesn't flicker
+          }
+          Double DefMult = 1.5
+          if (positionLocked) {
+             drive.updatePoseEstimate();
+             PoseVelocity2d feedback = drive.computeFeedback(lockPose);
+  
+            PoseVelocity2d boostedPower = new PoseVelocity2d(
+                new Vector2d(
+                    feedback.linearVel.x * DefMult,
+                    feedback.linearVel.y * DefMult
+        ),
+        feedback.angVel * DefMult
+    );
+
+    // 4. Send the command to the motors
+    drive.setDrivePowers(boostedPower);
+
+          } else if (autoRotate) {
+
+                if (result != null && result.isValid()) {
+                    double tx = result.getTx();
+                    double kP_turn = 0.02;
+                    f_r = kP_turn * tx;
+
+                    f_r = Math.max(-0.5, Math.min(0.5, f_r));
+
+
+                    telemetry.addData("AutoRotate", "ACTIVE");
+                    telemetry.addData("tx", tx);
+
+                } else {
+                    telemetry.addData("AutoRotate", "NO TARGET");
+                }
+            } else {
+                f_r = gamepad1.right_stick_x;
+                if (-0.1 < f_r && f_r < 0.1) {
+                    f_r = 0;
+                }
+            }
+
+            boolean speed_bot = gamepad1.y;
+            boolean slow_bot = gamepad1.a;
+            boolean reg_bot = gamepad1.b;
+            boolean talha = gamepad1.x;
+
+
+            double intakeRPM = 1000;
+            // Give controller joysticks a deadzone.
+            if (-0.1 < f_x && f_x < 0.1) {
+                f_x = 0;
+            }
+            if (-0.1 < f_y && f_y < 0.1) {
+                f_y = 0;
+            }
+
+
+            // Apply weights to each component, such that when
+            // f_x and f_y are 45* on a unit circle and f_r is
+            // maxed out in a direction, each motor power adds
+            // up to 1.0.
+            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+            // Rotate the movement direction counter to the bot's rotation
+            double x = f_x * Math.cos(-botHeading) - f_y * Math.sin(-botHeading);
+            double y = f_x * Math.sin(-botHeading) + f_y * Math.cos(-botHeading);
+
+            x = x * 1.1;  // Counteract imperfect strafing
+
+// normalize, we can only have a maximum motor power of 1
+            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(f_r), 1);
+
+            double fl = y + x + rot;
+            double fr = y - x - rot;
+            double bl = y - x + rot;
+            double br = y + x - rot;
+
+
+
+
+
+
+            if (slow_bot){
+                speed = 0.2;
+                mode = 1;
+            }
+            if (reg_bot){
+                speed = 0.5;
+                mode = 2;
+            }
+            if (speed_bot){
+                speed = 0.8;
+                mode = 3;
+            }
+            if (talha){
+                speed = 1.0;
+                mode = 4;
+            }
+
+
+            frontleft.setPower(fl * speed / denominator);
+            frontright.setPower(fr * speed / denominator);
+            backleft.setPower(bl * speed / denominator);
+            backright.setPower(br * speed / denominator);
+
+
+// launcher
+            
+            if (gamepad2.dpad_right) {
+                LRPM += 50;
+            } else if (gamepad2.dpad_left) {
+                LRPM -= 50;
+            } else if (gamepad2.dpad_up) {
+                LRPM += 200;
+            } else if (gamepad2.dpad_down) {
+                LRPM -= 200;
+            }
+            if (gamepad2.right_trigger > 0.1) {
+                launcher.setVelocity(LRPM);
+            } else if (gamepad2.left_trigger > 0.1) {
+                launcher.setPower(-0.5);
+            } else {
+                launcher.setPower(0);
+            }
+// RSL 
+
+
+            double actualLRPM = launcher.getVelocity();
+			double error = actualLRPM - LRPM;
+
+			boolean LauncherReady =	 error >= -slowtoll && error <= fasttoll;
+       		
+            if (LauncherReady) {
+                RSL.setPosition(RSLhue);
+            } else if(gamepad2.right_trigger > 0.1){
+                RSL.setPosition(0.3);
+            } else if(actualLRPM < 0){
+                RSL.setPosition(0.5);
+            } else {
+                RSL.setPosition(0);
+            }
+            
+
+// intake
+            if (gamepad2.right_bumper) {
+                intake.setVelocity(intakeRPM);
+            } else if (gamepad2.left_bumper) {
+                intake.setPower(-0.5);
+            } else {
+                intake.setPower(0);
+            }
+
+// transferstopper
+            if (gamepad2.a) {
+                //transferstopper.setPosition(0.45);
+            } else {
+                //transferstopper.setPosition(0);
+            }
+ // lifts
+ //RUN_TO_POSITION Lift Toggle thingy
+ 
+         
+        rtPressed = gamepad1.right_trigger > 0.2;
+
+        if (rtPressed && !rtLastPressed) {
+            liftUp = !liftup;
+
+            if (liftUp) {
+                llift.setTargetPosition(LIFT_UP_POS);
+                rlift.setTargetPosition(LIFT_UP_POS);
+
+                llift.setPower(1.0);
+                rlift.setPower(1.0);
+            } else {
+                llift.setTargetPosition(LIFT_DOWN_POS);
+                rlift.setTargetPosition(LIFT_DOWN_POS);
+
+                llift.setPower(-1.0);
+                rlift.setPower(-1.0);
+            }
+        }
+
+        rtLastPressed = rtPressed;
+
+        //Stop when at target
+        int leftPos = llift.getCurrentPosition();
+        int rightPos = rlift.getCurrentPosition();
+
+        int leftTarget = llift.getTargetPosition();
+        int rightTarget = rlift.getTargetPosition();
+
+        int tolerance = 100;
+
+        //If both sides are at their targets, stop motors
+        if (Math.abs(leftPos - leftTarget) < tolerance &&
+            Math.abs(rightPos - rightTarget) < tolerance) {
+            llift.setPower(0);
+            rlift.setPower(0);
+        }
+    }
+}
+}
