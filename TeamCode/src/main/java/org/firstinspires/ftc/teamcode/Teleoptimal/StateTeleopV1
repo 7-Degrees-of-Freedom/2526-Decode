@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Teleop;
+package org.firstinspires.ftc.teamcode.Teleoptimal;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -8,6 +8,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 
 @TeleOp()
@@ -18,10 +24,10 @@ public class StateTeleopV1 extends LinearOpMode {
     public DcMotorEx launcher, intake;
     public DcMotorEx llift, rlift;
 
-    public Servo stopper, RSL;
+    public Servo transferstopper, RSL;
     public Limelight3A limelight;
 
-    // drive variables 
+    // drive variables
     double f_x;
     double f_y;
     double f_r;
@@ -32,7 +38,7 @@ public class StateTeleopV1 extends LinearOpMode {
     double LRPM = 900;
     double RSLhue = 0.62;
     double fasttoll = 180;
-	double slowtoll = 75;
+    double slowtoll = 75;
 
     //Intake Speed
 
@@ -78,8 +84,8 @@ public class StateTeleopV1 extends LinearOpMode {
         // Lift encoder reset and Run to postition
         llift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rlift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        
-        
+
+
         llift.setTargetPosition(LIFT_DOWN_POS);
         rlift.setTargetPosition(LIFT_DOWN_POS);
 
@@ -111,7 +117,7 @@ public class StateTeleopV1 extends LinearOpMode {
         limelight.pipelineSwitch(0);
         limelight.start();
 
-          // Inform the user that everything has been initialized.
+        // Inform the user that everything has been initialized.
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -217,7 +223,7 @@ public class StateTeleopV1 extends LinearOpMode {
 
 
 // launcher
-            
+
             if (gamepad2.dpad_right) {
                 LRPM += 50;
             } else if (gamepad2.dpad_left) {
@@ -234,14 +240,14 @@ public class StateTeleopV1 extends LinearOpMode {
             } else {
                 launcher.setPower(0);
             }
-// RSL 
+// RSL
 
 
             double actualLRPM = launcher.getVelocity();
-			double error = actualLRPM - LRPM;
+            double error = actualLRPM - LRPM;
 
-			boolean LauncherReady =	 error >= -slowtoll && error <= fasttoll;
-       		
+            boolean LauncherReady =	 error >= -slowtoll && error <= fasttoll;
+
             if (LauncherReady) {
                 RSL.setPosition(RSLhue);
             } else if(gamepad2.right_trigger > 0.1){
@@ -251,7 +257,7 @@ public class StateTeleopV1 extends LinearOpMode {
             } else {
                 RSL.setPosition(0);
             }
-            
+
 
 // intake
             if (gamepad2.right_bumper) {
@@ -268,47 +274,47 @@ public class StateTeleopV1 extends LinearOpMode {
             } else {
                 //transferstopper.setPosition(0);
             }
- // lifts
- //RUN_TO_POSITION Lift Toggle thingy
- 
-         
-        rtPressed = gamepad1.right_trigger > 0.2;
+            // lifts
+            //RUN_TO_POSITION Lift Toggle thingy
 
-        if (rtPressed && !rtLastPressed) {
-            liftUp = !liftup;
 
-            if (liftUp) {
-                llift.setTargetPosition(LIFT_UP_POS);
-                rlift.setTargetPosition(LIFT_UP_POS);
+            rtPressed = gamepad1.right_trigger > 0.2;
 
-                llift.setPower(1.0);
-                rlift.setPower(1.0);
-            } else {
-                llift.setTargetPosition(LIFT_DOWN_POS);
-                rlift.setTargetPosition(LIFT_DOWN_POS);
+            if (rtPressed && !rtLastPressed) {
+                liftUp = !liftUp;
 
-                llift.setPower(-1.0);
-                rlift.setPower(-1.0);
+                if (liftUp) {
+                    llift.setTargetPosition(LIFT_UP_POS);
+                    rlift.setTargetPosition(LIFT_UP_POS);
+
+                    llift.setPower(1.0);
+                    rlift.setPower(1.0);
+                } else {
+                    llift.setTargetPosition(LIFT_DOWN_POS);
+                    rlift.setTargetPosition(LIFT_DOWN_POS);
+
+                    llift.setPower(-1.0);
+                    rlift.setPower(-1.0);
+                }
+            }
+
+            rtLastPressed = rtPressed;
+
+            //Stop when at target
+            int leftPos = llift.getCurrentPosition();
+            int rightPos = rlift.getCurrentPosition();
+
+            int leftTarget = llift.getTargetPosition();
+            int rightTarget = rlift.getTargetPosition();
+
+            int tolerance = 100;
+
+            //If both sides are at their targets, stop motors
+            if (Math.abs(leftPos - leftTarget) < tolerance &&
+                    Math.abs(rightPos - rightTarget) < tolerance) {
+                llift.setPower(0);
+                rlift.setPower(0);
             }
         }
-
-        rtLastPressed = rtPressed;
-
-        //Stop when at target
-        int leftPos = llift.getCurrentPosition();
-        int rightPos = rlift.getCurrentPosition();
-
-        int leftTarget = llift.getTargetPosition();
-        int rightTarget = rlift.getTargetPosition();
-
-        int tolerance = 100;
-
-        //If both sides are at their targets, stop motors
-        if (Math.abs(leftPos - leftTarget) < tolerance &&
-            Math.abs(rightPos - rightTarget) < tolerance) {
-            llift.setPower(0);
-            rlift.setPower(0);
-        }
     }
-}
 }
