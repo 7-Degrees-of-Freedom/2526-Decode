@@ -223,7 +223,11 @@ public class StateTeleopV1 extends LinearOpMode {
 
 
 // launcher
-
+// GET DISTANCE FROM LIMELIGHT
+            // TODO
+            int dToGoal = 500;
+            LRPM = dToGoal * dToGoal * 11.7 - dToGoal * 80.9 + 1087;
+            LRPM = LRPM * 152.4;
             if (gamepad2.dpad_right) {
                 LRPM += 50;
             } else if (gamepad2.dpad_left) {
