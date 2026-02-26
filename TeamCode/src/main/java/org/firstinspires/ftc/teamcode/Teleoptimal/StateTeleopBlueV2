@@ -224,10 +224,12 @@ public class StateTeleopBlueV2 extends LinearOpMode {
 
 // launcher
 // GET DISTANCE FROM LIMELIGHT
-            // TODO
-            int dToGoal = 500;
+            double[] pose = LimelightHelpers.getTargetPose_RobotSpace("limelight");
+
+            double yMeters = pose[1];   // THIS is forward/back distance
+            double dToGoal = yMeters * 39.37 / 12;
             LRPM = dToGoal * dToGoal * 11.7 - dToGoal * 80.9 + 1087;
-            LRPM = LRPM * 152.4;
+            LRPM = LRPM / 2;
             if (gamepad2.dpad_right) {
                 LRPM += 50;
             } else if (gamepad2.dpad_left) {
