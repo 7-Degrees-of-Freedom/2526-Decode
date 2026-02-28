@@ -1,0 +1,183 @@
+package org.firstinspires.ftc.teamcode.auton;
+
+import com.acmerobotics.roadrunner.geometry.Pose2nd;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import.org.firstinspires.ftc.teamcode.drive.MecanumDrive;
+
+@Autonomous(name = "9ballBlueFar",group = "Blue")
+public class NineBallBlueFar extends LinearOpMode {
+
+private DcMotorEx frontleft, frontright, backleft, backright;
+private DcMotorEx launcher, intake;
+private Servo RSL;
+
+private class LimeLight3A {
+  public double [] getBotPose() {
+    //TODO: hook to NetworkTables or smth
+    return null; //{x, y, z, roll, pitch, yaw}
+  }
+}
+private LimeLight3A limeLight;
+
+@Override
+public void runOpMode() throws InterruptedException {
+
+//Hardware mappy
+frontleft = hardwareMap.get(DcMotorEx.class, "frontleft");
+frontright = hardwareMap.get(DcMotorEx.class, "frontright");
+backright = hardwareMap.get(DcMotorEx.class, "backright");
+backleft = hardwareMap.get(DcMotorEx.class, "backleft");
+
+launcher = hardwareMap.get(DcMotorEx. class, "launcher");
+intake = hardwareMap.get(DcMotorEx.class, "intake");
+RSL = hardwareMap.get(Serve.class, "RSL");
+
+limelight = new LimeLight3A();
+MecanumDrive drive = new MecanumDrive(hardwareMap);
+
+//Start pose I honestly don't know if this is right
+Pose2d startPose = new Pose2d(12, 60, Math.toRadians(180));
+drive.setPoseEstimate(startPose);
+
+//Maybe Apriltag pose correction
+double[] botpose = limelight.getBotPose();
+if (botpose != null) {
+  Pose2d corrected = new Pose2d(botpose[0], botpose[1], botpose[5]);
+  drive.setPoseEstimate(correction);
+}
+//Need actual field coordinates but this is wat copilot said
+Pose2d speakerPose = new Pose2d(-6, 36, Math.toRadians(180)); //scoring i think
+Pose2d ball2Pose = new Pose2d(24, 48, Math.toRadians(180)); //Maybe center ish
+Pose2d ball3Pose = new Pose2d(36, 54, Math.toRadians(180));
+Pose2d ball4Pose = new Pose2d(48, 54, Math.toRadians(180));
+Pose2d ball5Pose = new Pose2d(60, 48, Math.toRadians(180));
+Pose2d ball6Pose = new Pose2d(36, 42, Math.toRadians(180));
+Pose2d ball7Pose = new Pose2d(48, 42, Math.toRadians(180));
+Pose2d ball8Pose = new Pose2d(60, 36, Math.toRadians(180));
+Pose2d ball9Pose = new Pose2d(72, 36, Math.toRadians(180));
+
+Runnable spinUpShooter = () -> launcher.setVelocity(2000); //tune RPM
+Runnable stopShooter = () -> launcher.setPower(0);
+Runnable intakeOn = () -> intake.setPower(1.0);
+Runnable intakeOff = () -> intake.setPower(0.0);
+
+telemetry.addLine("9ballBlueFar ready");
+telemetry.update();
+
+waitForStart();
+if (isStopRequested()) return;
+
+//Building of trajectiory sequence
+var auto = drive.trajectorySequenceBuilder(startPose)
+
+    //score preload
+    .addDisplacementMarker(spinUpShooter)
+    .lineToSplineHeading(speakerPose)
+    .waitSeconds(0.4) //opefully enough time to let fly wheel reach speed
+    .addDisplacementMArker(()-> {
+      // feed artifacts (if needed, run intake for a sec)
+      intake.setPower(1.0);
+    })
+    .waitSeconds(0.3)
+    .addDisplacementMarker(intakeOff)
+
+    //Ball 2
+    .splineTo(ball2Pose.vec(), ball2Pose.getHeading())
+    .addDisplacementMarker(intakeOn)
+    .waitSeconds(0.4)
+    .addDisplacementMarker(intakeOff)
+    .splineTo(speakerPose.vec(), speakerPose.getHeading())
+    .waitSeconds(0.2)
+    .addDisplacementMarker(intakeOn)
+    .waitSeconds(0.3)
+    .addDisplacementMarker(intakeOff)
+
+    //ball 3
+    .splineTo(ball3Pose.vec(), ball3Pose.getHeading())
+    .addDisplacementMarker(intakeOn)
+    .waitSeconds(0.4)
+    .addDisplacementMarker(intakeOff)
+    .splineTo(speakerPose.vec(), speakerPose.getHeading())
+    .waitSeconds(0.2)
+    .addDisplacementMarker(intakeOn)
+    .waitSeconds(0.3)
+    .addDisplacementMarker(intakeOff)
+
+    //ball 4
+    .splineTo(ball4Pose.vec(), ball4Pose.getHeading())
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.4) 
+    .addDisplacementMarker(intakeOff) 
+    .splineTo(speakerPose.vec(), speakerPose.getHeading()) 
+    .waitSeconds(0.2) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.3) 
+    .addDisplacementMarker(intakeOff)
+
+    //ball 5
+    .splineTo(ball5Pose.vec(), ball5Pose.getHeading()) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.4) 
+    .addDisplacementMarker(intakeOff) 
+    .splineTo(speakerPose.vec(), speakerPose.getHeading()) 
+    .waitSeconds(0.2) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.3) 
+    .addDisplacementMarker(intakeOff)
+
+    // ball 6
+    .splineTo(ball6Pose.vec(), ball6Pose.getHeading()) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.4) 
+    .addDisplacementMarker(intakeOff) 
+    .splineTo(speakerPose.vec(), speakerPose.getHeading()) 
+    .waitSeconds(0.2) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.3) 
+    .addDisplacementMarker(intakeOff)
+
+    //ball 7
+    .splineTo(ball7Pose.vec(), ball7Pose.getHeading()) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.4) 
+    .addDisplacementMarker(intakeOff) 
+    .splineTo(speakerPose.vec(), speakerPose.getHeading()) 
+    .waitSeconds(0.2) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.3) 
+    .addDisplacementMarker(intakeOff)
+
+    //ball 8
+    .splineTo(ball8Pose.vec(), ball8Pose.getHeading()) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.4) 
+    .addDisplacementMarker(intakeOff) 
+    .splineTo(speakerPose.vec(), speakerPose.getHeading()) 
+    .waitSeconds(0.2) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.3) 
+    .addDisplacementMarker(intakeOff)
+
+    //ball 9
+    .splineTo(ball9Pose.vec(), ball9Pose.getHeading())
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.4) 
+    .addDisplacementMarker(intakeOff) 
+    .splineTo(speakerPose.vec(), speakerPose.getHeading()) 
+    .waitSeconds(0.2) 
+    .addDisplacementMarker(intakeOn) 
+    .waitSeconds(0.3) 
+    .addDisplacementMarker(intakeOff)
+
+    //Stop launcher at end
+    .addDisplacementMarker(stopShooter)
+
+    .build();
+
+  drive.folloeTrajectorySequence(auto);
+}
+}
